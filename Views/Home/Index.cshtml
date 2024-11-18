@@ -1,0 +1,130 @@
+﻿<div id="dashboard" class="container">
+    <form method="get" action="@Url.Action("Index", "Home")">
+        <div class="row">
+            <div class="col-md-12">
+                <input type="text" class="form-control" name="productoId" placeholder="Filtrar por producto...">
+            </div>
+            <div class="col-md-12">
+                <select class="form-control" name="año">
+                    <option value="">Seleccione un Año</option>
+                    @for (int i = 2000; i <= DateTime.Now.Year; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-12">
+                <select class="form-control" name="mes">
+                    <option value="">Mes</option>
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i).ToUpper()</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col text-center">
+                <button type="submit" class="dashboard-button"><i class="bi bi-search"></i> BUSCAR</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">TOTAL DE VENTAS</p>
+                        <h5 class="card-title">@ViewBag.TotalVentas</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <p class="card-text">TOTAL DE UNIDADES</p>
+                        <h5 class="card-title">@ViewBag.TotalUnidades</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div id="graficoPorMes"></div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div id="VentasPorMarca"></div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div id="Top"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const VentasMes = JSON.parse('@Html.Raw(ViewBag.VentasPorCategoria)');
+        const Categorias = JSON.parse('@Html.Raw(ViewBag.Categorias)');
+        const TopVendidos = JSON.parse('@Html.Raw(ViewBag.TopVendidos)');
+        const CantidadTop = JSON.parse('@Html.Raw(ViewBag.CantidadTop)');
+        const seriesVentasPorMes = JSON.parse('@Html.Raw(ViewBag.SeriesVentasPorMes)');
+        const categoriasVentasPorMes = JSON.parse('@Html.Raw(ViewBag.CategoriasVentasPorMes)');
+
+        const configuracionGraficoMeses = {
+            chart: {
+                type: 'pie',
+                background: '#333',
+                foreColor: '#FFF',
+                toolbar: {
+                    theme: { mode: 'dark' }
+                }
+            },
+            series: VentasMes,
+            labels: Categorias,
+            title: { text: 'VENTAS POR MARCA', style: { color: '#FFF' } },
+        };
+
+        const graficoSalario = new ApexCharts(document.getElementById('VentasPorMarca'), configuracionGraficoMeses);
+        graficoSalario.render();
+
+        const configuracionGraficoTop = {
+            chart: {
+                type: 'bar',
+                background: '#333',
+                foreColor: '#FFF',
+                toolbar: {
+                    theme: { mode: 'dark' }
+                }
+            },
+            series: [{ name: 'NOMBRE DEL PRODUCTO', data: CantidadTop }],
+            xaxis: { categories: TopVendidos, labels: { style: { colors: '#FFF' } } },
+            title: { text: 'TOP 10 PRODUCTOS MÁS VENDIDOS', style: { color: '#FFF' } },
+        };
+
+        const graficoTop = new ApexCharts(document.getElementById('Top'), configuracionGraficoTop);
+        graficoTop.render();
+
+        const configuracionGraficoPorMes = {
+            chart: {
+                type: 'line',
+                background: '#333',
+                foreColor: '#FFF',
+                toolbar: {
+                    theme: { mode: 'dark' }
+                }
+            },
+            series: [{ name: 'VENTAS', data: seriesVentasPorMes }],
+            xaxis: { categories: categoriasVentasPorMes, labels: { style: { colors: '#FFF' } } },
+            title: { text: 'VENTAS POR MES', style: { color: '#FFF' } },
+        };
+
+        const graficoVentaPorMes = new ApexCharts(document.getElementById('graficoPorMes'), configuracionGraficoPorMes);
+        graficoVentaPorMes.render();
+    });
+</script>
